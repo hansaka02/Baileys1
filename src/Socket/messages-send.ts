@@ -5,6 +5,7 @@ import { DEFAULT_CACHE_TTLS, WA_DEFAULT_EPHEMERAL } from '../Defaults'
 import {
 	AnyMessageContent,
 	MediaConnInfo,
+	AlbumMedia,
 	MessageReceiptType,
 	MessageRelayOptions,
 	MiscMessageGenerationOptions,
@@ -21,6 +22,7 @@ import {
 	encodeWAMessage,
 	encryptMediaRetryRequest,
 	extractDeviceJids,
+	generateMessageID,
 	generateMessageIDV2,
 	generateWAMessage,
 	getStatusCodeForMediaRetry,
@@ -636,6 +638,42 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 			if (additionalNodes && additionalNodes.length > 0) {
 				;(stanza.content as BinaryNode[]).push(...additionalNodes)
 			}
+
+				const content = normalizeMessageContent(message)!
+				const contentType = getContentType(content)!
+
+				if((isJidGroup(jid) || isJidUser(jid)) && (
+					contentType === 'interactiveMessage' ||
+					contentType === 'buttonsMessage' ||
+					contentType === 'listMessage'
+				)) {
+					const bizNode: BinaryNode = { tag: 'biz', attrs: {} }
+
+					if((message?.viewOnceMessage?.message?.interactiveMessage || message?.viewOnceMessageV2?.message?.interactiveMessage || message?.viewOnceMessageV2Extension?.message?.interactiveMessage || message?.interactiveMessage) || (message?.viewOnceMessage?.message?.buttonsMessage || message?.viewOnceMessageV2?.message?.buttonsMessage || message?.viewOnceMessageV2Extension?.message?.buttonsMessage || message?.buttonsMessage)) {
+						bizNode.content = [{
+							tag: 'interactive',
+							attrs: {
+								type: 'native_flow',
+								v: '1'
+							},
+							content: [{
+								tag: 'native_flow',
+								attrs: { v: '9', name: 'mixed' }
+							}]
+						}]
+					} else if(message?.listMessage) {
+						// list message only support in private chat
+						bizNode.content = [{
+							tag: 'list',
+							attrs: {
+								type: 'product_list',
+								v: '2'
+							}
+						}]
+					}
+
+					(stanza.content as BinaryNode[]).push(bizNode)
+				}
 
 			logger.debug({ msgId }, `sending message to ${participants.length} devices`)
 
