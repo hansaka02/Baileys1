@@ -81,6 +81,23 @@ type ViewOnce = {
 	viewOnce?: boolean
 }
 
+type Buttonable = {
+    /** add buttons to the message  */
+    buttons?: proto.Message.ButtonsMessage.IButton[]
+}
+type Templatable = {
+    /** add buttons to the message (conflicts with normal buttons)*/
+    templateButtons?: proto.IHydratedTemplateButton[]
+
+    footer?: string
+}
+type Interactiveable = {
+    /** add buttons to the message  */
+    interactiveButtons?: proto.Message.InteractiveMessage.NativeFlowMessage.NativeFlowButton[]
+    title?: string
+    subtitle?: string
+    media?: boolean
+}
 type Editable = {
 	edit?: WAMessageKey
 }
