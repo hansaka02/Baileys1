@@ -179,6 +179,16 @@ export type WASendableProduct = Omit<proto.Message.ProductMessage.IProductSnapsh
 	productImage: WAMediaUpload
 }
 
+		export type AlbumMedia =
+    | { 
+        image: WAMediaUpload
+        caption?: string
+    }
+    | { 
+        video: WAMediaUpload
+        caption?: string
+        gifPlayback?: boolean
+    } 
 export type AnyRegularMessageContent = (
 	| ({
 			text: string
@@ -227,7 +237,10 @@ export type AnyRegularMessageContent = (
 			footer?: string
 	  }
 	| SharePhoneNumber
-	| RequestPhoneNumber
+	| RequestPhoneNumber | ({
+        album: AlbumMedia[]
+        caption?: string
+    } & Mentionable & Contextable & Editable)
 ) &
 	ViewOnce
 
