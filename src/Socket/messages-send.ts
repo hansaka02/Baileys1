@@ -23,6 +23,7 @@ import {
 	encryptMediaRetryRequest,
 	extractDeviceJids,
 	generateMessageID,
+	getContentType,
 	generateMessageIDV2,
 	generateWAMessage,
 	getStatusCodeForMediaRetry,
